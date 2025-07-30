@@ -24,42 +24,15 @@ pipeline{
             }
             
         }
-        stage("Test"){
+        stage("Push To DockerHub"){
             steps{
-                echo "Developer / Tester tests likh ke dega..."
-            }
-            
-        }
-        stage("Push to Docker Hub"){
-            steps{
-                script{
-                    docker_push("dockerHubCreds","two-tier-flask-app")
-                }  
-            }
-        }
-        stage("Deploy"){
-            steps{
-                sh "docker compose up -d --build flask-app"
+                withCredentials([usernamePassword(
+                    credentialsId:"dockeridpass",
+                    usernameVariable:"dockerHubUser", 
+                    passwordVariable:"dockerHubPass")]){
+                sh 'docker login -u ${env.dockerHubUser} -p ${env.dockerHubPass}'
+                sh "docker image tag 2-tier-app:latest ${env.dockerHubUser}/2-tier-app:latest"
+                sh "docker push ${env.dockerHubUser}/2-tier-app:latest"
+                }
             }
         }
-    }
-
-post{
-        success{
-            script{
-                emailext from: 'mentor@trainwithshubham.com',
-                to: 'mentor@trainwithshubham.com',
-                body: 'Build success for Demo CICD App',
-                subject: 'Build success for Demo CICD App'
-            }
-        }
-        failure{
-            script{
-                emailext from: 'mentor@trainwithshubham.com',
-                to: 'mentor@trainwithshubham.com',
-                body: 'Build Failed for Demo CICD App',
-                subject: 'Build Failed for Demo CICD App'
-            }
-        }
-    }
-}
