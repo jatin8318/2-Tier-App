@@ -27,7 +27,7 @@ docker run -d \
 ii) Backend container
 ```bash
 docker run -d \
-    --name flaskapp \
+    --name 2-tier-app \
     --network=twotier \
     -e MYSQL_HOST=mysql \
     -e MYSQL_USER=root \
